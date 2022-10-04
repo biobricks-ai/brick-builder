@@ -1,0 +1,21 @@
+{:id "comptox"
+ :name "Computational Toxicology (CompTox) Chemicals Dashboard"
+ :description "The Dashboard includes chemical hazard data from both traditional laboratory animal studies and high-throughput screening"
+ :uri "https://www.epa.gov/chemical-research/comptox-chemicals-dashboard"
+ :data
+ [{:id "dsstox-identifiers"
+   :name "DSSTox identifiers mapped to CAS Numbers and Names File"
+   :description "The DSSTox Identifiers file is in Excel format and includes the CAS Number, DSSTox substance identifier (DTXSID) and the Preferred Name."
+   :media-type "text/csv"
+   :uri "https://clowder.edap-cluster.com/api/files/616dd943e4b0a5ca8aeea69d/blob"
+   :sha256 "f4d6aeb4f57bc45a76508d80c67628d05dbbe7ed18a53e0b4d5770c22684096a"}
+  {:id "physprop-analysis"
+   :name "PHYSPROP Analysis File"
+   :description "The data associated with the publication"
+   :uri "https://gaftp.epa.gov/COMPTOX/Sustainable_Chemistry_Data/Chemistry_Dashboard/PHYSPROP_Analysis/PHYSPROP_Analysis.zip"
+   :sha256 "1cd06808d2379b1adb8249698ef7a64771f11fc44501603012e2309a2017c876"}
+  {:id "dsstox-mapping"
+   :name "DSSTox Mapping File"
+   :description "The DSSTOX mapping file contains mappings between the DSSTox substance identifier (DTXSID) and the associated InChI String and InChI Key. The file is made available as a Tab Separated Value (TSV) file"
+   :uri "https://gaftp.epa.gov/COMPTOX/Sustainable_Chemistry_Data/Chemistry_Dashboard/DSSTox_Mapping_20160701.zip"
+   :sha256 "20873b9af06d54e7b0bd74d569b0e1cd3fc95a00844fbcf56138ea092214ef0b"}]}

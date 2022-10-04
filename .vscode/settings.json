@@ -1,0 +1,20 @@
+{
+  "calva.evalOnSave": true,
+  "calva.paredit.strictPreventUnmatchedClosingBracket": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "search.useParentIgnoreFiles": true,
+  "search.showLineNumbers": true,
+  "calva.replConnectSequences": [
+    {
+      "name": "Brick Builder",
+      "projectType": "deps.edn",
+      "menuSelections": {
+        "cljAliases": []
+      },
+      "afterCLJReplJackInCode": "(do (require 'hashp.core) (require 'biobricks.brick-builder) (in-ns 'insilica.brick-builder))",
+      "cljsType": "none"
+    }
+  ]
+}

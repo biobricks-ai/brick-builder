@@ -3,10 +3,10 @@
             [etaoin.api :as ea]
             [lambdaisland.uri :as uri]))
 
-(def substance-search-uri "https://www.echemportal.org/echemportal/substance-search?")
+(def substance-search-uri "https://www.echemportal.org/echemportal/substance-search")
 
 (defn substance-search-results [download-dir search-term]
-  (let [uri (str substance-search-uri
+  (let [uri (str substance-search-uri "?"
                  (uri/map->query-string {:query_term search-term}))
         opts {:download-dir download-dir}]
     (ea/with-wait-timeout 30

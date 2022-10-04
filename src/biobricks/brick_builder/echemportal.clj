@@ -8,7 +8,8 @@
 (defn substance-search-results [download-dir search-term]
   (let [uri (str substance-search-uri "?"
                  (uri/map->query-string {:query_term search-term}))
-        opts {:download-dir download-dir}]
+        opts {:download-dir download-dir
+              :user-agent "biobricks.ai brick builder"}]
     (ea/with-wait-timeout 30
       (ea/with-driver :chrome opts driver
         (doto driver

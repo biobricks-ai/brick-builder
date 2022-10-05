@@ -1,5 +1,7 @@
 (ns biobricks.brick-builder.echemportal
   (:require [babashka.fs :as fs]
+            [biobricks.brick-builder.util :as util]
+            [clojure.tools.logging :as log]
             [etaoin.api :as ea]
             [lambdaisland.uri :as uri]))
 
@@ -48,12 +50,14 @@
   (let [target-dir (fs/path "target" "echemportal")]
     (fs/create-dirs target-dir)
     (doseq [i (range 10 9999999)]
-      (fs/with-temp-dir [dir {:prefix "brick-builder"}]
-        (if-let [results (substance-search-results dir (str i "-*-*"))]
-          (do
-            (fs/move results (fs/path target-dir (str i ".csv")))
-            (prn "echemportal: Saved results for" i))
-          (prn "echemportal: No results for" i))))))
+      (util/retry
+       {:interval-ms 1000 :n 10}
+       (fs/with-temp-dir [dir {:prefix "brick-builder"}]
+         (if-let [results (substance-search-results dir (str i "-*-*"))]
+           (do
+             (fs/move results (fs/path target-dir (str i ".csv")))
+             (log/info "echemportal: Saved results for" i))
+           (log/info "echemportal: No results for" i)))))))
 
 (comment
   ;; Download search results

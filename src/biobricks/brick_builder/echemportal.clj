@@ -1,9 +1,14 @@
 (ns biobricks.brick-builder.echemportal
   (:require [babashka.fs :as fs]
             [biobricks.brick-builder.util :as util]
+            [clojure-csv.core :as csv]
+            [clojure.java.shell :as sh]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [etaoin.api :as ea]
             [lambdaisland.uri :as uri]))
+
+;; Crawl
 
 (def substance-search-uri "https://www.echemportal.org/echemportal/substance-search")
 
@@ -73,5 +78,86 @@
 
   ;; Run crawler
   (def crawler (future (crawl-substances)))
-  (future-cancel crawler)
+  (future-cancel crawler))
+
+;; Convert search results to parquet
+
+(def csv-header
+  ["Substance Name"
+   "Name type"
+   "Substance Number"
+   "Number type"
+   "Remark"
+   "Level"
+   "Result link"
+   "Source"
+   "GHS data"
+   "Property data"
+   ""])
+
+(defn fixup-row [row]
+  (cond
+    (= 10 (count row)) row
+
+    ; Fix unquoted urls with commas in them
+    (-> (nth row 6) uri/uri :scheme)
+    (let [i (-> row count (- 10) (+ 7))]
+      (-> (subvec row 0 6)
+          (into [(str/join "," (subvec row 6 i))])
+          (into (subvec row i))))
+
+    :else row))
+
+(defn collect-results [dir]
+  (loop [[file & more] (fs/list-dir dir)
+         results (transient #{})]
+    (if-not file
+      (persistent! results)
+      (let [text (-> file fs/file slurp)
+            [header & rows] (try
+                              (-> text csv/parse-csv doall)
+                              (catch Exception e
+                                (throw (ex-info (str "Error parsing " file ": " (ex-message e))
+                                                {:cause e
+                                                 :file file
+                                                 :text text}))))
+            rows (map fixup-row rows)]
+        (when-not (= header csv-header)
+          (throw (ex-info "Unexpected CSV header"
+                          {:actual header :expected csv-header})))
+        (doseq [row rows]
+          (when (not= 10 (count row))
+            (throw (ex-info (str "Wrong number of columns (" (count row) "), expected 10.")
+                            {:actual (count row)
+                             :expected 10
+                             :file file
+                             :row row}))))
+        (recur more (reduce conj! results rows))))))
+
+(defn write-csv [file results]
+  (->> results
+       (sort-by
+        (fn [[_ _ num]]
+          (or (some-> num (str/replace "-" "") parse-long)
+              Long/MAX_VALUE)))
+       (cons (pop csv-header))
+       csv/write-csv
+       (spit (fs/file file)))
+  file)
+
+(defn write-parquet [file results]
+  (fs/with-temp-dir [dir {:prefix "brick-builder"}]
+    (let [csv (fs/path dir "echemportal.csv")
+          parquet (fs/path dir "echemportal.parquet")]
+      (write-csv csv results)
+      (sh/sh "csv2parquet" (str csv) (str parquet))
+      (fs/move parquet file {:replace-existing true})))
+  file)
+
+(comment
+  (do
+    (def results (collect-results (fs/path "target" "echemportal")))
+    (count results))
+  (write-csv (fs/path "target" "echemportal.csv") results)
+  (write-parquet (fs/path "target" "echemportal.parquet") results)
   )

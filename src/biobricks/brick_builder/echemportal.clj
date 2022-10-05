@@ -67,4 +67,5 @@
   
   ;; Run crawler
   (def crawler (future (crawl-substances)))
+  (future-cancel crawler)
   )

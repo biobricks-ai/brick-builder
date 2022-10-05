@@ -34,7 +34,7 @@
       (ea/with-driver :chrome opts driver
         (ea/go driver uri)
         (when (click-csv-button? driver)
-          (loop [[i & more] (range 60)]
+          (loop [[_ & more] (range 60)]
             (let [results-file (->> (fs/list-dir download-dir)
                                     (filter #(= "result.csv" (fs/file-name %)))
                                     first)]

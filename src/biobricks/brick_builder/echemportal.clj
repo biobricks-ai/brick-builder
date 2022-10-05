@@ -60,5 +60,5 @@
     (substance-search-results (str dir) "05-*-*"))
   
   ;; Run crawler
-  (crawl-substances)
+  (def crawler (future (crawl-substances)))
   )

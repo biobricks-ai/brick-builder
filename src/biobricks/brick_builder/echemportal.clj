@@ -19,10 +19,10 @@
 
         (ea/visible? driver no-matches-query)
         false
-        
+
         more
         (do (Thread/sleep 500) (recur more))
-        
+
         :else
         (throw (RuntimeException. "Failed to get search results"))))))
 
@@ -66,11 +66,11 @@
   (fs/with-temp-dir [dir {:prefix "brick-builder"}]
     (-> (substance-search-results (str dir) "108-*-*")
         fs/file slurp))
-  
+
   ;; Empty results return nil
   (fs/with-temp-dir [dir {:prefix "brick-builder"}]
     (substance-search-results (str dir) "05-*-*"))
-  
+
   ;; Run crawler
   (def crawler (future (crawl-substances)))
   (future-cancel crawler)

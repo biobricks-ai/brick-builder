@@ -6,17 +6,23 @@
 (def substance-search-uri "https://www.echemportal.org/echemportal/substance-search")
 
 (defn click-csv-button? [driver]
-  (try
-    (ea/click-visible
-     driver
-     [{:tag :echem-export-buttons}
-      {:tag :button}
-      {:fn/text "CSV"}])
-    true
-    (catch Exception e
-      (if (ea/exists? driver {:fn/text "Your search criteria didn't match any substance."})
+  (let [csv-query [{:tag :echem-export-buttons}
+                   {:tag :button}
+                   {:fn/text "CSV"}]
+        no-matches-query {:fn/text "Your search criteria didn't match any substance."}]
+    (loop [[_ & more] (range 60)]
+      (cond
+        (ea/visible? driver csv-query)
+        (do (ea/click-visible driver csv-query) true)
+
+        (ea/visible? driver no-matches-query)
         false
-        (throw e)))))
+        
+        more
+        (do (Thread/sleep 500) (recur more))
+        
+        :else
+        (throw (RuntimeException. "Failed to get search results"))))))
 
 (defn substance-search-results [download-dir search-term]
   (let [uri (str substance-search-uri "?"

@@ -51,7 +51,9 @@
     (fs/create-dirs target-dir)
     (doseq [i (range 10 9999999)]
       (util/retry
-       {:interval-ms 1000 :n 10}
+       {:interval-ms 1000
+        :n 10
+        :throw-pred (partial instance? InterruptedException)}
        (fs/with-temp-dir [dir {:prefix "brick-builder"}]
          (if-let [results (substance-search-results dir (str i "-*-*"))]
            (do

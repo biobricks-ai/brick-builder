@@ -54,13 +54,15 @@
 (defn crawl-substances []
   (let [target-dir (fs/path "target" "echemportal")]
     (fs/create-dirs target-dir)
-    (doseq [i (range 10 9999999)]
+    (doseq [i (range 10 999)]
       (util/retry
        {:interval-ms 1000
         :n 10
         :throw-pred (partial instance? InterruptedException)}
        (fs/with-temp-dir [dir {:prefix "brick-builder"}]
-         (if-let [results (substance-search-results dir (str i "-*-*"))]
+         (if-let [results (substance-search-results
+                           dir
+                           (str i (when (<= 100 i) "*") "-*-*"))]
            (do
              (fs/move results (fs/path target-dir (str i ".csv")))
              (log/info "echemportal: Saved results for" i))
